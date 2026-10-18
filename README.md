@@ -299,3 +299,30 @@
 - **The final README**
   - These planning notes move to `docs/planning.md`
   - The main README becomes: what it is, the report screenshot, how to install it, how to use it, and what the test showed
+
+## 9. Tools
+
+- **What I'm building:** an MCP server, not the agent itself
+  - The agent is the user's AI tool (Claude Code, Cursor, etc.)
+  - So there's no LLM code and no API cost on my side
+
+- **Toolset (all free)**
+
+  | Job | Tool | Why |
+  |---|---|---|
+  | Language | **Python 3.11+** | Simplest choice, and the code it protects is Python too |
+  | MCP server | **Official `mcp` Python SDK** (FastMCP) | Turns plain Python functions into MCP tools with very little code |
+  | Finding and hashing functions | **`ast`** (built into Python) | Splits code into functions and compares structure, so whitespace and comments are ignored automatically |
+  | Saving expected outcomes | **pytest** + JSON files | Runs existing tests and saves the results of each function with sample inputs |
+  | Before-and-after differences | **`difflib`** (built into Python) | Shows exactly which lines changed in the report |
+  | Storing frozen state | **JSON files** in `.harness/` | Easy to read, and easy to commit to git |
+  | HTML report | **Jinja2** | Fills an HTML template with the check results |
+  | Version history | **git** | Tracks the `.harness/` folder and lets the user undo rejected changes |
+  | Packaging | **uv** + `pyproject.toml` | Users can run it with one command (`uvx ...`) when adding the connector |
+  | Testing the server during development | **MCP Inspector** | Lets me call my MCP tools by hand without an AI tool |
+  | Testing it with an AI | **Claude Code** or **Claude Desktop** | Both support MCP connectors |
+  | Blocking later (optional) | **Claude Code hooks** or a **git pre-commit hook** | For when the harness goes from detecting changes to blocking them |
+
+- **Notes**
+  - `ast` is the key tool: it solves the false-alarm problem from section 7, because formatting changes don't change the structure it compares
+  - Saving outcomes means running the user's functions, so the harness runs them in a separate process with a timeout; a broken or slow function can't freeze the harness
