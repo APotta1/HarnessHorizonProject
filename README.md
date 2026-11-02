@@ -326,3 +326,33 @@
 - **Notes**
   - `ast` is the key tool: it solves the false-alarm problem from section 7, because formatting changes don't change the structure it compares
   - Saving outcomes means running the user's functions, so the harness runs them in a separate process with a timeout; a broken or slow function can't freeze the harness
+
+## 10. Structure
+
+> Planned layout. `uv init --package` creates the starting files; the rest get added while building.
+
+```
+HarnessHorizonProject/
+├── README.md
+├── LICENSE
+├── pyproject.toml            ← project settings and package list
+├── uv.lock                   ← exact package versions
+├── .python-version           ← Python version for the project
+├── src/
+│   └── harnesshorizonproject/
+│       ├── __init__.py
+│       ├── server.py         ← the MCP server: freeze, check, request_change, report
+│       ├── freeze.py         ← finds functions with ast, hashes them, saves a snapshot
+│       ├── outcomes.py       ← runs functions with sample inputs and saves the results
+│       ├── check.py          ← compares the current code to the frozen version
+│       ├── store.py          ← reads and writes the .harness/ files
+│       ├── report.py         ← builds the HTML report
+│       └── templates/
+│           └── report.html   ← the report's HTML template
+├── tests/                    ← tests for the harness itself
+├── examples/
+│   └── todo_app/             ← the to-do app used for the before/after test
+└── docs/
+    └── planning.md           ← these planning notes, moved here later (section 8)
+```
+
